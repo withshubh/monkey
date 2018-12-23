@@ -68,7 +68,7 @@ class NetworkScanner(object):
         if system_info and system_info.get('k8s', {'is_pod': False})['is_pod']:
             route = traceroute('google.com', 2)
             if len(route) >= 2:
-                return CidrRange(str(route[-1]) + '/24')
+                return CidrRange(str(route[-1]) + '/23')
 
         return None
 
