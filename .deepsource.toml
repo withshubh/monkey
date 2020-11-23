@@ -5,8 +5,9 @@ test_patterns = ["**/**_test.py"]
 [[analyzers]]
 name = "python"
 enabled = true
-dependency_file_paths = ["monkey/monkey_island/requirements.txt",
-                         "monkey/infection_monkey/requirements.txt"
+dependency_file_paths = [
+                          "monkey/monkey_island/requirements.txt",
+                          "monkey/infection_monkey/requirements.txt"
                          ]
 
   [analyzers.meta]
