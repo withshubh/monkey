@@ -71,4 +71,5 @@ def _hash_to_string(hash_: Any):
         return hash_
     if type(hash_) is bytes:
         return binascii.hexlify(bytearray(hash_)).decode()
-    raise Exception(f"Can't convert hash_ to string, unsupported hash_ type {type(hash_)}")
+    raise Exception(
+        f"Can't convert hash_ to string, unsupported hash_ type {type(hash_)}")
