@@ -1,6 +1,8 @@
 version = 1
 
-test_patterns = ["**/**_test.py"]
+test_patterns = ["**/**_test.py",
+                 "/_test.py"
+                 ]
 
 [[analyzers]]
 name = "python"
