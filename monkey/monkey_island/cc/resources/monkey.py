@@ -30,8 +30,7 @@ class Monkey(flask_restful.Resource):
 
         if guid:
             monkey_json = mongo.db.monkey.find_one_or_404({"guid": guid})
-            monkey_json['config'] = ConfigService.decrypt_flat_config(
-                monkey_json['config'])
+            monkey_json['config'] = ConfigService.decrypt_flat_config(monkey_json['config'])
             return monkey_json
 
         return {}
@@ -43,8 +42,7 @@ class Monkey(flask_restful.Resource):
         update = {"$set": {'modifytime': datetime.now()}}
         monkey = NodeService.get_monkey_by_guid(guid)
         if 'keepalive' in monkey_json:
-            update['$set']['keepalive'] = dateutil.parser.parse(
-                monkey_json['keepalive'])
+            update['$set']['keepalive'] = dateutil.parser.parse(monkey_json['keepalive'])
         else:
             update['$set']['keepalive'] = datetime.now()
         if 'config' in monkey_json:
@@ -53,12 +51,10 @@ class Monkey(flask_restful.Resource):
             update['$set']['config_error'] = monkey_json['config_error']
 
         if 'tunnel' in monkey_json:
-            tunnel_host_ip = monkey_json['tunnel'].split(
-                ":")[-2].replace("//", "")
+            tunnel_host_ip = monkey_json['tunnel'].split(":")[-2].replace("//", "")
             NodeService.set_monkey_tunnel(monkey["_id"], tunnel_host_ip)
 
-        ttl = create_monkey_ttl_document(
-            DEFAULT_MONKEY_TTL_EXPIRY_DURATION_IN_SECONDS)
+        ttl = create_monkey_ttl_document(DEFAULT_MONKEY_TTL_EXPIRY_DURATION_IN_SECONDS)
         update['$set']['ttl_ref'] = ttl.id
 
         return mongo.db.monkey.update({"_id": monkey["_id"]}, update, upsert=False)
@@ -71,8 +67,7 @@ class Monkey(flask_restful.Resource):
         monkey_json['creds'] = []
         monkey_json['dead'] = False
         if 'keepalive' in monkey_json:
-            monkey_json['keepalive'] = dateutil.parser.parse(
-                monkey_json['keepalive'])
+            monkey_json['keepalive'] = dateutil.parser.parse(monkey_json['keepalive'])
         else:
             monkey_json['keepalive'] = datetime.now()
 
@@ -90,27 +85,25 @@ class Monkey(flask_restful.Resource):
 
         # try to find new monkey parent
         parent = monkey_json.get('parent')
-        # default values in case of manual run
-        parent_to_add = (monkey_json.get('guid'), None)
-        # current parent is known
-        if parent and parent != monkey_json.get('guid'):
-            exploit_telem = list(mongo.db.telemetry.find({'telem_category': {'$eq': 'exploit'},
-                                                          'data.result': {'$eq': True},
-                                                          'data.machine.ip_addr': {'$in': monkey_json['ip_addresses']},
-                                                          'monkey_guid': {'$eq': parent}}))
+        parent_to_add = (monkey_json.get('guid'), None)  # default values in case of manual run
+        if parent and parent != monkey_json.get('guid'):  # current parent is known
+            exploit_telem = [x for x in
+                             mongo.db.telemetry.find({'telem_category': {'$eq': 'exploit'},
+                                                      'data.result': {'$eq': True},
+                                                      'data.machine.ip_addr': {'$in': monkey_json['ip_addresses']},
+                                                      'monkey_guid': {'$eq': parent}})]
             if 1 == len(exploit_telem):
-                parent_to_add = (exploit_telem[0].get(
-                    'monkey_guid'), exploit_telem[0].get('data').get('exploiter'))
+                parent_to_add = (exploit_telem[0].get('monkey_guid'), exploit_telem[0].get('data').get('exploiter'))
             else:
                 parent_to_add = (parent, None)
         elif (not parent or parent == monkey_json.get('guid')) and 'ip_addresses' in monkey_json:
-            exploit_telem = list(mongo.db.telemetry.find({'telem_category': {'$eq': 'exploit'},
-                                                          'data.result': {'$eq': True},
-                                                          'data.machine.ip_addr': {'$in': monkey_json['ip_addresses']}}))
+            exploit_telem = [x for x in
+                             mongo.db.telemetry.find({'telem_category': {'$eq': 'exploit'},
+                                                      'data.result': {'$eq': True},
+                                                      'data.machine.ip_addr': {'$in': monkey_json['ip_addresses']}})]
 
             if 1 == len(exploit_telem):
-                parent_to_add = (exploit_telem[0].get(
-                    'monkey_guid'), exploit_telem[0].get('data').get('exploiter'))
+                parent_to_add = (exploit_telem[0].get('monkey_guid'), exploit_telem[0].get('data').get('exploiter'))
 
         if not db_monkey:
             monkey_json['parent'] = [parent_to_add]
@@ -119,12 +112,10 @@ class Monkey(flask_restful.Resource):
 
         tunnel_host_ip = None
         if 'tunnel' in monkey_json:
-            tunnel_host_ip = monkey_json['tunnel'].split(
-                ":")[-2].replace("//", "")
+            tunnel_host_ip = monkey_json['tunnel'].split(":")[-2].replace("//", "")
             monkey_json.pop('tunnel')
 
-        ttl = create_monkey_ttl_document(
-            DEFAULT_MONKEY_TTL_EXPIRY_DURATION_IN_SECONDS)
+        ttl = create_monkey_ttl_document(DEFAULT_MONKEY_TTL_EXPIRY_DURATION_IN_SECONDS)
         monkey_json['ttl_ref'] = ttl.id
 
         mongo.db.monkey.update({"guid": monkey_json["guid"]},
@@ -133,14 +124,12 @@ class Monkey(flask_restful.Resource):
 
         # Merge existing scanned node with new monkey
 
-        new_monkey_id = mongo.db.monkey.find_one(
-            {"guid": monkey_json["guid"]})["_id"]
+        new_monkey_id = mongo.db.monkey.find_one({"guid": monkey_json["guid"]})["_id"]
 
         if tunnel_host_ip is not None:
             NodeService.set_monkey_tunnel(new_monkey_id, tunnel_host_ip)
 
-        existing_node = mongo.db.node.find_one(
-            {"ip_addresses": {"$in": monkey_json["ip_addresses"]}})
+        existing_node = mongo.db.node.find_one({"ip_addresses": {"$in": monkey_json["ip_addresses"]}})
 
         if existing_node:
             node_id = existing_node["_id"]
