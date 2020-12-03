@@ -1,5 +1,6 @@
 from monkey_island.cc.database import mongo
 from monkey_island.cc.models import Monkey
+from monkey_island.cc.services.edge.edge import EdgeService
 from monkey_island.cc.services.node import NodeService
 from monkey_island.cc.services.telemetry.processing.utils import \
     get_edge_by_scan_or_exploit_telemetry
@@ -13,8 +14,7 @@ def process_scan_telemetry(telemetry_json):
     update_edges_and_nodes_based_on_scan_telemetry(telemetry_json)
     test_open_data_endpoints(telemetry_json)
 
-    current_monkey = Monkey.get_single_monkey_by_guid(
-        telemetry_json['monkey_guid'])
+    current_monkey = Monkey.get_single_monkey_by_guid(telemetry_json['monkey_guid'])
     target_ip = telemetry_json['data']['machine']['ip_addr']
     test_segmentation_violation(current_monkey, target_ip)
 
