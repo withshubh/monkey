@@ -69,10 +69,7 @@ class Environment(object, metaclass=ABCMeta):
         return self._credentials_required and self._is_credentials_set_up()
 
     def _is_credentials_set_up(self) -> bool:
-        if self._config and self._config.user_creds:
-            return True
-        else:
-            return False
+        return bool(self._config and self._config.user_creds)
 
     @property
     def testing(self):

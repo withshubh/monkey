@@ -102,10 +102,7 @@ class AWSExporter(Exporter):
             import_response = security_hub_client.batch_import_findings(Findings=findings_list)
             logger.debug("Import findings response: {0}".format(repr(import_response)))
 
-            if import_response['ResponseMetadata']['HTTPStatusCode'] == 200:
-                return True
-            else:
-                return False
+            return import_response['ResponseMetadata']['HTTPStatusCode'] == 200
         except UnknownServiceError as e:
             logger.warning('AWS exporter called but AWS-CLI security hub service is not installed. Error: {}'.format(e))
             return False
